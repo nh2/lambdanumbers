@@ -157,6 +157,10 @@ nat l = error $ "Invalid Church numeral: " ++ show l ++ " should start with a la
 add :: Lambda
 add = λ2 A B . λ2 F X . (app a f) `app` (app2 b f x)
 
+-- Nontermination
+omega :: Lambda
+omega = (λ X . app x x) `app` (λ X . app x x)  -- (λx.x x)(λx.x x)
+
 
 -- Simple example adding program using lambda calculus
 runCalculator :: (Lambda -> String) -> IO ()
@@ -207,8 +211,6 @@ ex3 = (λ X . x `app` y) `app` (λ X . x)               -- (λx. xy)(λx.x) → 
 ex4 = (λ X . x `app` y) `app` ((λ2 X Z . z) `app` u)  -- (λx. xy)((λyz. z)u) → ((λyz. z)u)y → (λz. z)y → y
 
 -- Example 5 is ex4 and we have fixed the evaluation strategy, so there is nothing to do.
-
-omega = (λ X . app x x) `app` (λ X . app x x)  -- (λx.x x)(λx.x x)
 
 slide18 = (λ X . y) `app` omega  -- (λx.y)Ω → y using Normal-order reduction
 
