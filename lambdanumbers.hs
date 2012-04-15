@@ -211,10 +211,10 @@ ex4 = (λ X . x `app` y) `app` ((λ2 X Z . z) `app` u)  -- (λx. xy)((λyz. z)u)
 
 -- "and tests" collapses all tests to a single Bool
 tests = [ add == Def A (Def B (Def F (Def X (App (App (Var A) (Var F)) (App (App (Var B) (Var F)) (Var X))))))
-        , nf ex1 == Def A (Var Y)
-        , nf ex2 == Def Z (Var Z)
-        , nf ex3 == Var Y
-        , nf ex4 == Var Y
+        , nf ex1 == (λ A . y)
+        , nf ex2 == (λ Z . z)
+        , nf ex3 == y
+        , nf ex4 == y
         , all (\i -> nat (num i) == i) [0..100]
         ]
 
