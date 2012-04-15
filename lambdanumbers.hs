@@ -208,6 +208,10 @@ ex4 = (λ X . x `app` y) `app` ((λ2 X Z . z) `app` u)  -- (λx. xy)((λyz. z)u)
 
 -- Example 5 is ex4 and we have fixed the evaluation strategy, so there is nothing to do.
 
+omega = (λ X . app x x) `app` (λ X . app x x)  -- (λx.x x)(λx.x x)
+
+slide18 = (λ X . y) `app` omega  -- (λx.y)Ω → y using Normal-order reduction
+
 
 -- "and tests" collapses all tests to a single Bool
 tests = [ add == Def A (Def B (Def F (Def X (App (App (Var A) (Var F)) (App (App (Var B) (Var F)) (Var X))))))
@@ -215,6 +219,7 @@ tests = [ add == Def A (Def B (Def F (Def X (App (App (Var A) (Var F)) (App (App
         , nf ex2 == (λ Z . z)
         , nf ex3 == y
         , nf ex4 == y
+        , nf slide18 == y
         , all (\i -> nat (num i) == i) [0..100]
         ]
 
