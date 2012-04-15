@@ -2,6 +2,28 @@
 
 module Main where
 
+-- This is a revision exercise for the "Models of Computation" course at Imperial College London.
+
+-- It implements β-reduction, Church numerals and addition in Lambda Calculus.
+
+-- You will recognize from the lecture:
+
+--   * data Lamba -- the λ-term definition
+--   * fw         -- free variables
+--   * substitute -- variable substitution
+--   * nf         -- calculating the β-Normal Form
+--   * num / nat  -- converting numbers to Church numerals and back
+--   * add        -- A lambda expression for computing the sum of two Church numerals
+
+-- If you run this program ("runhaskell lambdanumbers.hs" or "main" from ghci),
+-- you will see a simple adding calculator that asks you for numbers
+-- and shows the lambda evaluation steps.
+
+-- Niklas Hambüchen
+
+
+-- License: MIT (you can modify and redistribute this as you wish).
+
 import Prelude hiding ((.), (^^))
 import Data.Char
 import Data.List
