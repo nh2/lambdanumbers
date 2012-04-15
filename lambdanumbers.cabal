@@ -1,0 +1,8 @@
+Name:                lambdanumbers
+Version:             0.1
+Build-type:          Simple
+Cabal-version:       >=1.2
+
+Executable lambdanumbers
+  Main-is: lambdanumbers.hs
+  Build-depends: base
