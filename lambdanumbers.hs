@@ -161,6 +161,11 @@ add = λ2 A B . λ2 F X . (app a f) `app` (app2 b f x)
 omega :: Lambda
 omega = (λ X . app x x) `app` (λ X . app x x)  -- (λx.x x)(λx.x x)
 
+-- Two ways for the successor function
+succLecture, succAlternative :: Lambda
+succLecture     = λ A . (λ2 F X . f `app` app2 a f x)    -- Putting the extra f outside
+succAlternative = λ A . (λ2 F X . app2 a f (f `app` x))  -- Putting the extra f inside (probably slower)
+
 
 -- Simple example adding program using lambda calculus
 runCalculator :: (Lambda -> String) -> IO ()
@@ -223,6 +228,7 @@ tests = [ add == Def A (Def B (Def F (Def X (App (App (Var A) (Var F)) (App (App
         , nf ex4 == y
         , nf slide18 == y
         , all (\i -> nat (num i) == i) [0..100]
+        , all (\i -> nf (succLecture `app` num i) == nf (succAlternative `app` num i)) [0..50]
         ]
 
 
