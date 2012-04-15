@@ -5,15 +5,15 @@ module Main where
 import Prelude hiding ((.))
 import Data.List
 import Control.Monad.Instances
-
 import Debug.Trace
+
 
 -- Change . to $ so that we can use it in lambda terms, use `compose` instead
 infixr 9 `compose`
-compose f g x = f (g x)
-
 infixr 0 .
-a . b = a $ b
+compose f g x = f (g x)
+a . b         = a $ b
+
 
 -- Variables we can use in lambda terms
 data Var = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
@@ -37,6 +37,7 @@ app2 x y z = x `app` y `app` z  -- app2 x y z = App (App x y) z
 -- Lambda shortcuts
 λ = Def; λ2 = def2; λ3 = def3
 
+
 -- Finding free variables
 fw :: Lambda -> [Var]
 fw l = case l of
@@ -49,6 +50,12 @@ varNotIn :: [Var] -> Var
 varNotIn vars = case [(A)..Z] \\ vars of
     []    -> error "ran out of free variables"
     (a:_) -> a
+
+
+-- Returns the contents of Left x or Right x, no matter what it is.
+whatever :: Either c c -> c
+whatever = either id id
+
 
 -- N[M/x]: replaces all occurrences of variable x in n by m
 substitute :: Lambda -> Lambda -> Var -> Lambda
@@ -65,27 +72,22 @@ substitute n m x = debug "substitute" (n,m,x) $ case n of
     App n1 n2         -> App (substitute n1 m x) (substitute n2 m x)
 
 
-whatever :: Either c c -> c
-whatever = either id id
-
 -- Normal form reduction
 nf :: Lambda -> Lambda
 nf l = whatever $ reduceAsFarAsPossible l
-    -- TODO SOTA
     where
         -- Applies reduction step until the normal form is reached (nontermination if there is none)
         reduceAsFarAsPossible l = nf1 l >>= reduceAsFarAsPossible
 
--- Does one reduction step
+-- Performs one beta reduction step
 nf1 :: Lambda -> Either Lambda Lambda
 nf1 l = debug "nf1" l $ case l of
-    Var x                       -> Left $ Var x  -- TODO check missing in slides?
+    Var x                       -> Left $ Var x              -- TODO check missing in slides?
     App (Def x m) n             -> Right $ substitute m n x  -- outermost
     App m n | Right m' <- nf1 m -> Right $ App m' n          -- leftmost
     App m n | Right n' <- nf1 n -> Right $ App m n'
     Def x m | Right m' <- nf1 m -> Right $ Def x m'
     x                           -> Left x                    -- No reduction possible
-    --_                       -> error $ "cannot calculate beta-normalform of: " ++ show l
 
 
 -- Numbers to Church numerals
@@ -97,7 +99,7 @@ num n = λ2 F X . (f ^^ n) x
     where
         f ^^ n = foldl1 compose (replicate n (App f))
 
--- Converts Church numerals back to integers
+-- Church numerals back to numbers
 nat :: Lambda -> Int
 nat (Def f (Def x chain)) = count 0 f x chain
     where
@@ -109,7 +111,7 @@ nat (Def f (Def x chain)) = count 0 f x chain
 nat l = error $ "Invalid Church numeral: " ++ show l ++ " should start with a lambda abstraction describing successor function and zero variable"
 
 
--- Addition of Church numerals
+-- Addition of Church numerals in Lambda Calculus. Usage: "add `app` num1 `app` num2"
 add :: Lambda
 add = λ2 A B . λ2 F X . (app a f) `app` (app2 b f x)
 
@@ -138,15 +140,16 @@ main = do
             Right reduced -> putStrLn (" -> " ++ show reduced) >> printEvalTrace reduced
 
 
--- Slide Examples of β-Reduction
+-- From slide "Examples of β-Reduction"
 
 ex1 = (λ2 X Y . x) `app` y  -- (λxy. x)y =α (λxz. x)y → λz. y
 ex2 = (λ2 Y Z . z) `app` u  -- (λyz.z)u → λz. z
                             -- (λy(λz.z))u
                             -- (λz.z)[u/y] -- here we have to "prefer" z so that it is not renamed to a
-ex3 = (λ X . x `app` y) `app` (λ X . x)              -- (λx. xy)(λx.x) → (λx. x)y → y
-ex4 = (λ X . x `app` y) `app` ((λ2 X Z . z) `app` u) -- (λx. xy)((λyz. z)u) → ((λyz. z)u)y → (λz. z)y → y
--- ex5 is ex4 and we have fixed the evaluation strategy
+ex3 = (λ X . x `app` y) `app` (λ X . x)               -- (λx. xy)(λx.x) → (λx. x)y → y
+ex4 = (λ X . x `app` y) `app` ((λ2 X Z . z) `app` u)  -- (λx. xy)((λyz. z)u) → ((λyz. z)u)y → (λz. z)y → y
+
+-- Example 5 is ex4 and we have fixed the evaluation strategy, so there is nothing to do.
 
 
 -- "and tests" collapses all tests to a single Bool
@@ -168,5 +171,5 @@ debug :: (Show a, Show b) => [Char] -> a -> b -> b
 debug name input res | _DEBUG = trace (name ++ ":  " ++ show input ++ " ->  " ++ show res) res
 debug _    _     res          = res
 
--- Performs one β reduction step and elimitates the information whether the term could be simplified
+-- Performs one beta reduction step and elimitates the information whether the term could be simplified
 nfstep l = whatever $ nf1 l
