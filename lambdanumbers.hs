@@ -46,6 +46,12 @@ data Var = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R
 data Lambda = Var Var | Def Var Lambda | App Lambda Lambda
               deriving (Show, Eq)
 
+-- USAGE:
+--   * In lambda abstractions, use CAPITAL letters
+--   * In lambda bodies, use lowercase letters
+--   * You can use the dot as expected
+--   * Example: λ X . x
+
 
 -- Variable shortcuts
 [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z] = map Var [A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z]
