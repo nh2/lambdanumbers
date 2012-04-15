@@ -191,6 +191,7 @@ main = do hSetBuffering stdout NoBuffering
         askStyle = do
             putStr "Want to see lambdas or Haskell datatypes? [L/d] "
             style <- getLine
+            putStrLn ""
             return $ case map toLower style of
                 'd':_ -> show
                 _     -> pretty
