@@ -2,9 +2,10 @@
 
 module Main where
 
-import Prelude hiding ((.))
+import Prelude hiding ((.), (^^))
+import Data.Char
 import Data.List
-import Control.Monad.Instances
+import System.IO
 import Debug.Trace
 
 
@@ -36,6 +37,19 @@ app2 x y z = x `app` y `app` z  -- app2 x y z = App (App x y) z
 
 -- Lambda shortcuts
 λ = Def; λ2 = def2; λ3 = def3
+
+
+-- Lambda pretty-printing, showing only necessary brackets
+showVar x = [toLower (head (show x))]
+
+pretty (Def x l) = "λ" ++ showVar x ++ "." ++ prettyRec l  -- no brackets for outermost lambda
+pretty l         = prettyRec l
+
+prettyRec l = case l of
+    Var x               -> showVar x
+    Def x l'            -> "(λ" ++ showVar x ++ "." ++ prettyRec l' ++ ")"
+    App l1 l2@(App _ _) -> prettyRec l1 ++ "(" ++ prettyRec l2 ++ ")"      -- brackets as application is right-associative
+    App l1 l2           -> prettyRec l1 ++ " " ++ prettyRec l2
 
 
 -- Finding free variables
@@ -117,7 +131,9 @@ add = λ2 A B . λ2 F X . (app a f) `app` (app2 b f x)
 
 
 -- Simple example adding program using lambda calculus
-main = do
+runCalculator :: (Lambda -> String) -> IO ()
+runCalculator showLambda = do
+
     firstNum  <- askSummand "first"
     secondNum <- askSummand "second"
 
@@ -134,10 +150,22 @@ main = do
             int <- read `fmap` getLine
             printChurch int
             return (num int)
-        printChurch n = putStrLn $ " -> " ++ show (num n) ++ "\n"
+        printChurch n = putStrLn $ " -> " ++ showLambda (num n) ++ "\n"
         printEvalTrace l = case nf1 l of
-            Left  done    -> putStrLn "    beta-reduced.\n"
-            Right reduced -> putStrLn (" -> " ++ show reduced) >> printEvalTrace reduced
+            Left  _       -> putStrLn "    beta-reduced.\n"
+            Right reduced -> putStrLn (" -> " ++ showLambda reduced) >> printEvalTrace reduced
+
+
+-- Starts the calculator
+main = do hSetBuffering stdout NoBuffering
+          askStyle >>= runCalculator
+    where
+        askStyle = do
+            putStr "Want to see lambdas or Haskell datatypes? [L/d] "
+            style <- getLine
+            return $ case map toLower style of
+                'd':_ -> show
+                _     -> pretty
 
 
 -- From slide "Examples of β-Reduction"
@@ -173,3 +201,10 @@ debug _    _     res          = res
 
 -- Performs one beta reduction step and elimitates the information whether the term could be simplified
 nfstep l = whatever $ nf1 l
+
+
+-- Either monad (in Control.Monad.Instances) in GHC >= 7.0
+instance Monad (Either e) where
+    return = Right
+    Left  l >>= _ = Left l
+    Right r >>= k = k r
