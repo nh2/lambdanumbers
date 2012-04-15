@@ -56,7 +56,7 @@ prettyRec l = case l of
 fw :: Lambda -> [Var]
 fw l = case l of
     Var x   -> [x]
-    Def x m -> fw m
+    Def _ m -> fw m
     App m n -> fw m ++ fw n
 
 -- Choosing unused variables
@@ -86,14 +86,14 @@ substitute n m x = debug "substitute" (n,m,x) $ case n of
     App n1 n2         -> App (substitute n1 m x) (substitute n2 m x)
 
 
--- Normal form reduction
+-- Normal form β-reduction
 nf :: Lambda -> Lambda
 nf l = whatever $ reduceAsFarAsPossible l
     where
         -- Applies reduction step until the normal form is reached (nontermination if there is none)
         reduceAsFarAsPossible l = nf1 l >>= reduceAsFarAsPossible
 
--- Performs one beta reduction step
+-- Performs one β-reduction step
 nf1 :: Lambda -> Either Lambda Lambda
 nf1 l = debug "nf1" l $ case l of
     Var x                       -> Left $ Var x              -- TODO check missing in slides?
@@ -139,7 +139,7 @@ runCalculator showLambda = do
 
     let churchSum = add `app` firstNum `app` secondNum
 
-    putStrLn "Press enter to show beta reduction steps:" >> getLine
+    _ <- putStrLn "Press enter to show beta reduction steps:" >> getLine
     printEvalTrace churchSum
 
     putStrLn $ "as natural number: " ++ show (nat (nf churchSum))
@@ -199,7 +199,7 @@ debug :: (Show a, Show b) => [Char] -> a -> b -> b
 debug name input res | _DEBUG = trace (name ++ ":  " ++ show input ++ " ->  " ++ show res) res
 debug _    _     res          = res
 
--- Performs one beta reduction step and elimitates the information whether the term could be simplified
+-- Performs one β reduction step and elimitates the information whether the term could be simplified
 nfstep l = whatever $ nf1 l
 
 
