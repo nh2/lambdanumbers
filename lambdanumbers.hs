@@ -86,8 +86,8 @@ prettyRec l = case l of
 fw :: Lambda -> [Var]
 fw l = case l of
     Var x   -> [x]
-    Def _ m -> fw m
-    App m n -> fw m ++ fw n
+    Def x m -> fw m \\ [x]
+    App m n -> nub $ fw m ++ fw n
 
 -- Choosing unused variables
 varNotIn :: [Var] -> Var
