@@ -42,7 +42,7 @@ a . b         = a $ b
 
 -- Variables we can use in lambda terms
 data Var = A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
-           deriving (Eq, Show, Enum)
+           deriving (Eq, Show, Enum, Ord)
 
 -- THE definition
 data Lambda = Var Var | Def Var Lambda | App Lambda Lambda
@@ -208,6 +208,15 @@ main = do hSetBuffering stdout NoBuffering
                 _     -> pretty
 
 
+-- From slide "Sets of Free and Bound variables"
+
+fw1 = λ X . (x `app` y)                      -- FV (λx. xy) = {y}
+                                             -- TODO check: WRONG in the slides. It says {x}, but should be {x,y}:
+fw2 = (λ X . x `app` y) `app` x              -- FV ((λx. xy) x) = {x,y}
+fw3 = λ2 X Y . x                             -- FV (λxy. x) = {}
+fw4 = (λ X . app x x) `app` (λ X . app x x)  -- FV ((λx. xx)(λx. xx)) = {}
+fw5 = λ X . x `app` (λ Y . x `app` y)        -- FV (λx. x(λy. yx)) = {}
+
 -- From slide "Examples of β-Reduction"
 
 ex1 = (λ2 X Y . x) `app` y  -- (λxy. x)y =α (λxz. x)y → λz. y
@@ -222,8 +231,18 @@ ex4 = (λ X . x `app` y) `app` ((λ2 X Z . z) `app` u)  -- (λx. xy)((λyz. z)u)
 slide18 = (λ X . y) `app` omega  -- (λx.y)Ω → y using Normal-order reduction
 
 
+-- Set equality for lists
+setEq :: (Eq a, Ord a) => [a] -> [a] -> Bool
+setEq s1 s2 = sort s1 == sort s2
+
+
 -- "and tests" collapses all tests to a single Bool
 tests = [ add == Def A (Def B (Def F (Def X (App (App (Var A) (Var F)) (App (App (Var B) (Var F)) (Var X))))))
+        , fw fw1 `setEq` [Y]
+        , fw fw2 `setEq` [X, Y]
+        , fw fw3 `setEq` []
+        , fw fw4 `setEq` []
+        , fw fw5 `setEq` []
         , nf ex1 == (λ A . y)
         , nf ex2 == (λ Z . z)
         , nf ex3 == y
