@@ -14,6 +14,8 @@ module Main where
 --   * nf         -- calculating the β-Normal Form
 --   * num / nat  -- converting numbers to Church numerals and back
 --   * add        -- A lambda expression for computing the sum of two Church numerals
+--   * omega      -- Nontermination
+--   * succ...    -- Two ways for the successor function
 
 -- If you run this program ("runhaskell lambdanumbers.hs" or "main" from ghci),
 -- you will see a simple adding calculator that asks you for numbers
